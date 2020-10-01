@@ -81,8 +81,11 @@ namespace API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-
+        
+        [Route("Logout")]
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Logout()
         {
             try
