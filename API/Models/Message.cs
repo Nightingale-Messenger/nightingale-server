@@ -1,3 +1,5 @@
+using System;
+
 namespace API.Models
 {
     public class Message
@@ -8,6 +10,10 @@ namespace API.Models
         
         public User User { get; set; }
         
-        public Conversation Conversation { get; set; }
+        public DateTime DateTime { get; set; }
+        
+        public User Receiver { get; set; }
+
+        //public Conversation Conversation { get; set; }
     }
 }
