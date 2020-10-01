@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using API.Utils;
 
 namespace API.Controllers
 {
@@ -17,15 +19,18 @@ namespace API.Controllers
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly ILogger _logger;
+        private readonly IConfiguration _jwtConfiguration;
         
         public AuthController(
             UserManager<User> userManager,
-            SignInManager<User> signInManager,   
-            ILogger<AuthController> logger)
+            SignInManager<User> signInManager,
+            ILogger<AuthController> logger,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
+            _jwtConfiguration = configuration.GetSection("TokenOptions");
         }
         
         [HttpGet]
@@ -54,6 +59,8 @@ namespace API.Controllers
             try
             {
                 await _userManager.CreateAsync(user, registerModel.Password);
+                await _signInManager.PasswordSignInAsync(
+                    user, registerModel.Password, true, false);
                 return Created("", user);
             }
             catch (Exception ex)
@@ -74,7 +81,12 @@ namespace API.Controllers
                 var user = await _userManager.FindByEmailAsync(loginModel.Email);
                 await _signInManager.PasswordSignInAsync(
                     user, loginModel.Password, false, false);
-                return Ok();
+                var jwt = TokenCreator.CreateToken(_jwtConfiguration, user);
+                return Ok(new Token()
+                {
+                    AccessToken = jwt,
+                    User = user
+                });
             }
             catch (Exception ex)
             {

@@ -46,13 +46,13 @@ namespace API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ChangePassword([FromBody] string oldPwd, string newPwd)
+        public async Task<IActionResult> ChangePassword([FromBody]PasswordChangeModel model)
         {
             var user = await _userManager.GetUserAsync(User);
 
             try
             {
-                await _userManager.ChangePasswordAsync(user, oldPwd, newPwd);
+                await _userManager.ChangePasswordAsync(user, model.oldPwd, model.newPwd);
                 return Ok();
             }
             catch (Exception ex)

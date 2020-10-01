@@ -4,8 +4,8 @@ namespace API.Models
 {
     public class Token
     {
-        public Guid Uuid { get; }
-        
-        public User User { get; }
+        public string AccessToken { get; set; }
+
+        public User User { get; set; }
     }
 }
