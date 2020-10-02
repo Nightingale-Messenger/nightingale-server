@@ -4,7 +4,7 @@ namespace API.Models
 {
     public class Conversation
     {
-        public int Id { get; }
+        public int Id { get; set; }
         
         public List<Message> Messages { get; set; }
     }

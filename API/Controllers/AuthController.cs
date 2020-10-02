@@ -51,11 +51,13 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register([FromBody]RegisterModel registerModel)
         {
+            _logger.LogInformation("Register has been called");
             var user = new User()
             {
                 Email = registerModel.Email,
                 UserName = registerModel.Email.Split('@')[0]
             };
+            Console.WriteLine(user.UserName);
             try
             {
                 await _userManager.CreateAsync(user, registerModel.Password);
@@ -76,9 +78,11 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Login([FromBody] LoginModel loginModel)
         {
+            _logger.LogInformation("Login has been called");
             try
             {
                 var user = await _userManager.FindByEmailAsync(loginModel.Email);
+
                 await _signInManager.PasswordSignInAsync(
                     user, loginModel.Password, false, false);
                 var jwt = TokenCreator.CreateToken(_jwtConfiguration, user);
@@ -100,6 +104,7 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Logout()
         {
+            _logger.LogInformation("Logout has been called");
             try
             {
                 await _signInManager.SignOutAsync();
