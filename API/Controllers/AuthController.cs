@@ -54,16 +54,20 @@ namespace API.Controllers
             _logger.LogInformation("Register has been called");
             var user = new User()
             {
-                Email = registerModel.Email,
-                UserName = registerModel.Email.Split('@')[0]
+                Email = registerModel.Email
             };
-            Console.WriteLine(user.UserName);
+            user.UserName = user.Id;
             try
             {
                 await _userManager.CreateAsync(user, registerModel.Password);
-                await _signInManager.PasswordSignInAsync(
-                    user, registerModel.Password, true, false);
-                return Created("", user);
+                // await _signInManager.PasswordSignInAsync(
+                //     user, registerModel.Password, true, false);
+                return await Login(new LoginModel()
+                {
+                    Email = registerModel.Email,
+                    Password = registerModel.Password
+                });
+                //return Created("", user);
             }
             catch (Exception ex)
             {
@@ -89,7 +93,8 @@ namespace API.Controllers
                 return Ok(new Token()
                 {
                     AccessToken = jwt,
-                    User = user
+                    UserName = user.UserName,
+                    Email = user.Email
                 });
             }
             catch (Exception ex)
