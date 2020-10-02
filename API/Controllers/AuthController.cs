@@ -60,10 +60,24 @@ namespace API.Controllers
             Console.WriteLine(user.UserName);
             try
             {
-                await _userManager.CreateAsync(user, registerModel.Password);
-                await _signInManager.PasswordSignInAsync(
+                var r = await _userManager.CreateAsync(user, registerModel.Password);
+                if (!r.Succeeded)
+                {
+                    return BadRequest(r.Errors);
+                }
+                var s = await _signInManager.PasswordSignInAsync(
                     user, registerModel.Password, true, false);
-                return Created("", user);
+                
+                if (s.IsLockedOut) return BadRequest(new {message = "User is locked out"});
+                if (s.IsNotAllowed) return BadRequest(new {message = "User is not allowed"});
+                if (s.RequiresTwoFactor) return BadRequest(new {message = "User requires 2FA"});
+
+                var jwt = TokenCreator.CreateToken(_jwtConfiguration, user);
+                return Ok(new Token
+                {
+                    AccessToken = jwt,
+                    User = user
+                });
             }
             catch (Exception ex)
             {
@@ -83,8 +97,13 @@ namespace API.Controllers
             {
                 var user = await _userManager.FindByEmailAsync(loginModel.Email);
 
-                await _signInManager.PasswordSignInAsync(
+                var s = await _signInManager.PasswordSignInAsync(
                     user, loginModel.Password, false, false);
+                
+                if (s.IsLockedOut) return BadRequest(new {message = "User is locked out"});
+                if (s.IsNotAllowed) return BadRequest(new {message = "User is not allowed"});
+                if (s.RequiresTwoFactor) return BadRequest(new {message = "User requires 2FA"});
+                
                 var jwt = TokenCreator.CreateToken(_jwtConfiguration, user);
                 return Ok(new Token()
                 {
