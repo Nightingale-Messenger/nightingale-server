@@ -8,6 +8,8 @@ namespace API.Data
     {
         public DbSet<Message> Messages { get; set; }
         
+        public DbSet<Contact> Contacts { get; set; }
+        
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
