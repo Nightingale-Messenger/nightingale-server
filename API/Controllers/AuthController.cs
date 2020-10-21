@@ -44,7 +44,7 @@ namespace API.Controllers
             return Ok();
         }
         
-        [Route("Register")]
+        [Route("register")]
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -75,7 +75,7 @@ namespace API.Controllers
             }
         }
         
-        [Route("Login")]
+        [Route("login")]
         [HttpPost]
         [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -103,7 +103,7 @@ namespace API.Controllers
             }
         }
         
-        [Route("Logout")]
+        [Route("logout")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

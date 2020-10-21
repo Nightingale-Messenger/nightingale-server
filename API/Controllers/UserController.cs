@@ -32,7 +32,7 @@ namespace API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ChangeUsername(string username)
+        public async Task<IActionResult> ChangeUsername([FromBody]string username)
         {
             var user = await _userManager.GetUserAsync(User);
 
