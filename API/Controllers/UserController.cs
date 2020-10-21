@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using API.Data;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -16,17 +18,21 @@ namespace API.Controllers
     {
         private readonly UserManager<User> _userManager;
 
+        private readonly DatabaseContext _dbContext; 
+
         public UserController(
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            DatabaseContext dbContext)
         {
             _userManager = userManager;
+            _dbContext = dbContext;
         }
 
         [Route("username")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> ChangeUsername(string username)
+        public async Task<IActionResult> ChangeUsername([FromBody]string username)
         {
             var user = await _userManager.GetUserAsync(User);
 
@@ -40,6 +46,25 @@ namespace API.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [Route("publicusername")]
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> ChangePublicUserName([FromBody] string NewPublicUserName)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            if (_dbContext.Users.SingleOrDefault(u => u.PublicUserName == NewPublicUserName) != null)
+            {
+                return BadRequest(new { message = "PublicUserName in use"});
+            }
+
+            user.PublicUserName = NewPublicUserName;
+            await _userManager.UpdateAsync(user);
+
+            return Ok(user.PublicUserName);
         }
 
         [Route("password")]
