@@ -11,9 +11,7 @@ namespace API.Models
         public int? ContactId { get; set; }
         
         public string? ReceiverId { get; set; }
-        
-        public string SenderId { get; set; }
-        
+
         public string Text { get; set; }
         
         public DateTime Date { get; set; }
