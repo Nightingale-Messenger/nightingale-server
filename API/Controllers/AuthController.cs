@@ -89,7 +89,7 @@ namespace API.Controllers
                 return Ok(new Token()
                 {
                     AccessToken = jwt,
-                    User = user
+                    UserName = user.UserName
                 });
             }
             catch (Exception ex)
