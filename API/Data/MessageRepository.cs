@@ -77,23 +77,17 @@ namespace API.Data
 
         public void Update(Message item)
         {
-            _db.Entry(item).State = EntityState.Modified;
+            _db.Update(item);
         }
 
         public void UpdateRange(IEnumerable<Message> items)
         {
-            foreach (var item in items)
-            {
-                _db.Entry(item).State = EntityState.Modified;
-            }
+            _db.UpdateRange(items);
         }
 
         public void UpdateRange(params Message[] items)
         {
-            foreach (var item in items)
-            {
-                _db.Entry(item).State = EntityState.Modified;
-            }
+            _db.UpdateRange(items);
         }
 
         public async Task<int> Save()
