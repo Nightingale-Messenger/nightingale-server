@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using Nightingale.Core.Entities.Base;
 
-namespace API.Data
+namespace Nightingale.Core.Repositories.Base
 {
-    public interface IRepository<T, in TId> where T: class
+    public interface IRepository<T, TId> where T : EntityBase<TId>
     {
         Task Add(T item);
         Task AddRange(IEnumerable<T> items);
@@ -18,7 +19,7 @@ namespace API.Data
         void UpdateRange(IEnumerable<T> items);
         void UpdateRange(params T[] items);
         Task<int> Save();
-        Task<T?> Find(TId id);
+        Task<T> Find(TId id);
         IEnumerable<T> GetAll();
     }
 }

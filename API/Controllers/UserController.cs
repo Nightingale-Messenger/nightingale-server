@@ -7,18 +7,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+using Microsoft.VisualBasic;
 
 namespace API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
 
-        private readonly DatabaseContext _dbContext; 
+        private readonly DatabaseContext _dbContext;
 
         public UserController(
             UserManager<User> userManager,
@@ -27,7 +27,7 @@ namespace API.Controllers
             _userManager = userManager;
             _dbContext = dbContext;
         }
-
+        
         [Route("username")]
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]

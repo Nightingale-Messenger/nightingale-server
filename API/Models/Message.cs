@@ -9,10 +9,12 @@ namespace API.Models
         public string Text { get; set; }
         
         public User Sender { get; set; }
+
+        public User Receiver { get; set; }
         
         public DateTime DateTime { get; set; }
         
-        public Contact Contact { get; set; }
+        //public Contact Contact { get; set; }
 
         //public Conversation Conversation { get; set; }
     }

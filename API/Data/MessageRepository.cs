@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using API.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace API.Data
 {
-    class MessageRepository : IRepository<Message, int>
+    class MessageRepository : IMessageRepository
     {
         private readonly DatabaseContext _db;
 
@@ -103,6 +104,17 @@ namespace API.Data
         public IEnumerable<Message> GetAll()
         {
             return _db.Messages;
+        }
+
+        public IEnumerable<Message> GetLastN(int n, User issuer, User target)
+        {
+            return (from m in _db.Messages
+                where m.Sender.Id == issuer.Id &&
+                    m.Receiver.Id == target.Id ||
+                    m.Sender.Id == target.Id &&
+                    m.Receiver.Id == issuer.Id
+                orderby m.DateTime descending
+                select m).AsNoTracking().Take(n);
         }
     }
 }

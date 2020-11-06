@@ -8,6 +8,10 @@ namespace API.Models
     public class User : IdentityUser
     {
         public string PublicUserName { get; set; }
+
+        public List<UserContact> UserContacts { get; set; }
+        
+        //public ICollection<Contact> Contacts { get; set; }
         //public string AvatarPath { get; set; }
 
         //public ICollection<Token> Tokens { get; set; }

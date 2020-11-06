@@ -32,3 +32,11 @@ Desktop.ini
 
 # Migrations
 **/[Mm]igrations
+
+# Appsettings
+**/appsettings.json
+**/appsettings.Development.json
+
+
+**/bin
+**/obj

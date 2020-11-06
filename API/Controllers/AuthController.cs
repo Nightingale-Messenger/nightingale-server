@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Threading.Tasks;
 using API.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,7 @@ namespace API.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
@@ -34,6 +35,7 @@ namespace API.Controllers
         }
         
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> CheckStatus()
         {
             _logger.LogInformation("CheckStatus called");  
@@ -55,7 +57,8 @@ namespace API.Controllers
             var user = new User()
             {
                 Email = registerModel.Email,
-                UserName = registerModel.Email.Split('@')[0]
+                UserName = registerModel.Email.Split('@')[0],
+                PublicUserName = "User" + DateTimeOffset.UtcNow.ToUnixTimeSeconds()
             };
             Console.WriteLine(user.UserName);
             try

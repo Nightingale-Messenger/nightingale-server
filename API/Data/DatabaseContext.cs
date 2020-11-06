@@ -10,6 +10,8 @@ namespace API.Data
         
         public DbSet<Contact> Contacts { get; set; }
         
+        public DbSet<UserContact> UserContacts { get; set; }
+        
         public DatabaseContext(DbContextOptions<DatabaseContext> options)
             : base(options)
         {
@@ -17,6 +19,19 @@ namespace API.Data
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<UserContact>()
+                .HasKey(u => new {u.UserId, u.ContactId});
+            
+            modelBuilder.Entity<UserContact>()
+                .HasOne(uc => uc.User)
+                .WithMany(c => c.UserContacts)
+                .HasForeignKey(uc => uc.UserId);
+            
+            modelBuilder.Entity<UserContact>()
+                .HasOne(uc => uc.Contact)
+                .WithMany(u => u.UserContacts)
+                .HasForeignKey(uc => uc.ContactId);
+
             base.OnModelCreating(modelBuilder);
         }
     }

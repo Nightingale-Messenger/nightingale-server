@@ -5,7 +5,10 @@ namespace API.Models
     public class Contact
     {
         public int Id { get; set; }
-
-        public List<User> Users;
+        
+        public List<Message> Messages { get; set; }
+        
+        //public ICollection<User> Users { get; set; }
+        public List<UserContact> UserContacts { get; set; }
     }
 }

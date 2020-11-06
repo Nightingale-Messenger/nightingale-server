@@ -1,20 +1,17 @@
-using System.Text;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using API.Data;
-using API.Hubs;
-using API.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
-namespace API
+namespace Nightingale.API
 {
     public class Startup
     {
@@ -29,17 +26,13 @@ namespace API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddCustomCors();
-
             services.AddCustomDbContext(Configuration);
-
             services.AddCustomIdentity();
-
             services.ConfigureCustomIdentity();
-            
-            services.AddControllers();
-
             services.AddMessageRepository();
-
+            services.AddUserService();
+            services.AddMessageService();
+            services.AddControllers();
             services.AddSignalR();
         }
 
@@ -49,25 +42,19 @@ namespace API
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                IdentityModelEventSource.ShowPII = true;    
             }
-            
-            app.UseHttpsRedirection();
             
             app.UseCors(builder => builder.AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod());
 
+            app.UseHttpsRedirection();
+
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-                endpoints.MapHub<UserHub>("/userhub");
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }
