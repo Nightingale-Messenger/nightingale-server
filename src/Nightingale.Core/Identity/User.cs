@@ -7,7 +7,7 @@ namespace Nightingale.Core.Identity
 {
     public class User : IdentityUser
     {
-        public string PublicUSerName { get; set; }
+        public string PublicUserName { get; set; }
         
         public IEnumerable<Message> SentMessages { get; set; }
         

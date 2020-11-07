@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Security.Policy;
 using System.Threading.Tasks;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Models;
 using Nightingale.Core.Repositories;
 using Nightingale.App.Mapper;
 using Nightingale.Core.Entities;
+using Nightingale.Core.Identity;
 
 namespace Nightingale.App.Services
 {
@@ -38,6 +40,18 @@ namespace Nightingale.App.Services
         {
             return NightingaleMapper.Mapper.Map<IEnumerable<MessageModel>>(
                 _messageRepository.GetLastN(n, issuerId, targetId));
+        }
+        
+        public Task<IEnumerable<UserModel>> GetContacts(string userId)
+        {
+            return NightingaleMapper
+                .Mapper.Map<Task<IEnumerable<UserModel>>>(_messageRepository.GetContacts(userId));
+        }
+
+        public async Task<IEnumerable<MessageModel>> GetMessagesBeforeId(int id)
+        {
+            return NightingaleMapper.Mapper.Map<IEnumerable<MessageModel>>(
+                _messageRepository.GetMessagesBeforeId(20, id));
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Nightingale.App.Models;
@@ -20,5 +21,7 @@ namespace Nightingale.App.Interfaces
         Task Logout();
 
         Task<OperationDetails> ChangePasswordAsync(User user, PasswordChangeModel passwordChangeModel);
+
+        Task<IEnumerable<UserModel>> FindByPublicUserNameAsync(string publicUserName);
     }
 }

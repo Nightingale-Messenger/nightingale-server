@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Mapper;
 using Nightingale.App.Models;
@@ -137,6 +140,19 @@ namespace Nightingale.App.Services
         public async Task<User> GetUserAsync(ClaimsPrincipal user)
         {
             return await _userManager.GetUserAsync(user);
+        }
+
+        public async Task<IEnumerable<UserModel>> FindByPublicUserName(string publicUserName)
+        {
+            return NightingaleMapper.Mapper.Map<IEnumerable<UserModel>>(null);
+        }
+
+        public async Task<IEnumerable<UserModel>> FindByPublicUserNameAsync(string publicUserName)
+        {
+            return NightingaleMapper.Mapper.Map<IEnumerable<UserModel>>(
+                _userManager.Users
+                    .Where(u => EF.Functions.Like(u.PublicUserName, publicUserName))
+                    .ToList());
         }
     }
 }

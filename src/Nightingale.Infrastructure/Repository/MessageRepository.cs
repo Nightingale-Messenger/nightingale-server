@@ -6,6 +6,7 @@ using Nightingale.Core.Identity;
 using Nightingale.Core.Repositories;
 using Nightingale.Infrastructure.Data;
 using Nightingale.Infrastructure.Repository.Base;
+using System.Threading.Tasks;
 
 namespace Nightingale.Infrastructure.Repository
 {
@@ -15,7 +16,7 @@ namespace Nightingale.Infrastructure.Repository
         {
         }
 
-        public IEnumerable<Message> GetLastN(int n, string issuerId, string targetId)
+        public async Task<IEnumerable<Message>> GetLastN(int n, string issuerId, string targetId)
         {
             return (from m in _db.Messages
                 where m.Sender.Id == issuerId &&
@@ -26,7 +27,7 @@ namespace Nightingale.Infrastructure.Repository
                 select m).AsNoTracking().Take(n);
         }
 
-        public IEnumerable<User> GetContacts(string userId)
+        public async Task<IEnumerable<User>> GetContacts(string userId)
         {
             return (from u in _db.Users
                 join ms in _db.Messages on u.Id equals ms.SenderId
@@ -34,6 +35,19 @@ namespace Nightingale.Infrastructure.Repository
                 where ms.SenderId == userId ||
                       mr.ReceiverId == userId
                 select u).AsNoTracking();
+        }
+
+        public async Task<IEnumerable<Message>> GetMessagesBeforeId(int n, int id)
+        {
+            var msg = await _db.Messages.FindAsync(new Message() {Id = id});
+            return (from m in _db.Messages
+                    where m.Id < id &&
+                          m.SenderId == msg.SenderId &&
+                          m.ReceiverId == msg.ReceiverId ||
+                          m.Id < id &&
+                          m.SenderId == msg.ReceiverId &&
+                          m.ReceiverId == msg.SenderId
+                          select m).Take(n);
         }
     }
 }

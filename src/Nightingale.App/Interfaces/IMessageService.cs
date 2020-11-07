@@ -10,5 +10,9 @@ namespace Nightingale.App.Interfaces
     {
         Task<MessageModel> Create(UserModel sender, UserModel receiver, string text, DateTime dateTime);
         Task<IEnumerable<MessageModel>> GetLastN(int n, string issuerId, string targetId);
+
+        Task<IEnumerable<UserModel>> GetContacts(string userId);
+
+        Task<IEnumerable<MessageModel>> GetMessagesBeforeId(int id);
     }
 }

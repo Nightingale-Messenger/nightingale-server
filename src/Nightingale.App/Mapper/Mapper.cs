@@ -2,6 +2,7 @@ using System;
 using Nightingale.Core.Entities;
 using Nightingale.App.Models;
 using AutoMapper;
+using Nightingale.Core.Identity;
 
 namespace Nightingale.App.Mapper
 {
@@ -26,6 +27,8 @@ namespace Nightingale.App.Mapper
         public NightingaleDtoMapper()
         {
             CreateMap<Message, MessageModel>();
+
+            CreateMap<User, UserModel>();
         }
     }
 }

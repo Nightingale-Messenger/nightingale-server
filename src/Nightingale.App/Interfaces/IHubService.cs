@@ -16,5 +16,7 @@ namespace Nightingale.App.Interfaces
         Task<IEnumerable<UserModel>> FindByPublicUserName(string publicUserName);
 
         Task<IEnumerable<MessageModel>> GetMessagesBeforeId(int id);
+
+        Task<bool> CheckMessagePermission(int messageId, string userId);
     }
 }

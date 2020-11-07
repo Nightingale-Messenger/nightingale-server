@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Mapper;
 using Nightingale.App.Models;
+using Nightingale.Core.Entities;
 using Nightingale.Core.Identity;
 using Nightingale.Core.Repositories;
 
@@ -44,19 +45,29 @@ namespace Nightingale.App.Services
             return await _messageService.GetLastN(20, issuerId, receiverId);
         }
 
-        public Task<IEnumerable<UserModel>> GetContacts(User user)
+        public async Task<IEnumerable<UserModel>> GetContacts(User user)
         {
-            throw new System.NotImplementedException();
+            return await _messageService.GetContacts(user.Id);
         }
 
         public Task<IEnumerable<UserModel>> FindByPublicUserName(string publicUserName)
         {
-            throw new System.NotImplementedException();
+            return _userService.FindByPublicUserNameAsync(publicUserName);
         }
 
         public Task<IEnumerable<MessageModel>> GetMessagesBeforeId(int id)
         {
-            throw new System.NotImplementedException();
+            return _messageService.GetMessagesBeforeId(id);
+        }
+
+        public async Task<bool> CheckMessagePermission(int messageId, string userId)
+        {
+            var message = await _messageRepository.Find(messageId);
+
+            if (message.SenderId == userId || message.ReceiverId == userId) return true;
+
+            return false;
+
         }
     }
 }
