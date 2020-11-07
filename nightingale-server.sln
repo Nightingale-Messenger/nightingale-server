@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API", "API\API.csproj", "{D4C9A766-7CBC-465F-BBC4-C5BD854D9D25}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nightingale.Core", "src\Nightingale.Core\Nightingale.Core.csproj", "{2FD3A4C5-2569-4DCF-9C05-589FCB8B32C5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nightingale.Infrastructure", "src\Nightingale.Infrastructure\Nightingale.Infrastructure.csproj", "{9810B61D-8B96-480E-91C1-D263C7C53CEF}"
@@ -16,10 +14,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D4C9A766-7CBC-465F-BBC4-C5BD854D9D25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D4C9A766-7CBC-465F-BBC4-C5BD854D9D25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D4C9A766-7CBC-465F-BBC4-C5BD854D9D25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D4C9A766-7CBC-465F-BBC4-C5BD854D9D25}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2FD3A4C5-2569-4DCF-9C05-589FCB8B32C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2FD3A4C5-2569-4DCF-9C05-589FCB8B32C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2FD3A4C5-2569-4DCF-9C05-589FCB8B32C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
