@@ -2,7 +2,7 @@ namespace Nightingale.Core.Entities.Base
 {
     public abstract class EntityBase<TId> : IEntityBase<TId>
     {
-        public TId Id { get; }
+        public TId Id { get; set; }
         
         public bool IsTransient()
         {

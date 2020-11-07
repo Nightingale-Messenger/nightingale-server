@@ -7,6 +7,6 @@ namespace Nightingale.Core.Repositories
 {
     public interface IMessageRepository : IRepository<Message, int>
     {
-        public IEnumerable<Message> GetLastN(int n, User issuer, User target);
+        public IEnumerable<Message> GetLastN(int n, string issuerId, string targetId);
     }
 }

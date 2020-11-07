@@ -18,7 +18,17 @@ namespace Nightingale.Infrastructure.Data
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Message>()
+            builder.Entity<User>()
+                .HasMany(u => u.SentMessages)
+                .WithOne(m => m.Sender)
+                .HasForeignKey(m => m.SenderId);
+
+            builder.Entity<User>()
+                .HasMany(u => u.ReceivedMessages)
+                .WithOne(m => m.Receiver)
+                .HasForeignKey(m => m.ReceiverId);
+
+            /*builder.Entity<Message>()
                 .HasKey(m => new {m.SenderId, m.ReceiverId});
 
             builder.Entity<Message>()
@@ -29,7 +39,7 @@ namespace Nightingale.Infrastructure.Data
             builder.Entity<Message>()
                 .HasOne(m => m.Receiver)
                 .WithMany(r => r.Messages)
-                .HasForeignKey(m => m.ReceiverId);
+                .HasForeignKey(m => m.ReceiverId);*/
         }
     }
 }

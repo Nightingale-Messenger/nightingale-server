@@ -15,15 +15,25 @@ namespace Nightingale.Infrastructure.Repository
         {
         }
 
-        public IEnumerable<Message> GetLastN(int n, User issuer, User target)
+        public IEnumerable<Message> GetLastN(int n, string issuerId, string targetId)
         {
             return (from m in _db.Messages
-                where m.Sender.Id == issuer.Id &&
-                      m.Receiver.Id == target.Id ||
-                      m.Sender.Id == target.Id &&
-                      m.Receiver.Id == issuer.Id
+                where m.Sender.Id == issuerId &&
+                      m.Receiver.Id == targetId ||
+                      m.Sender.Id == targetId &&
+                      m.Receiver.Id == issuerId
                 orderby m.DateTime descending
                 select m).AsNoTracking().Take(n);
+        }
+
+        public IEnumerable<User> GetContacts(string userId)
+        {
+            return (from u in _db.Users
+                join ms in _db.Messages on u.Id equals ms.SenderId
+                join mr in _db.Messages on u.Id equals mr.ReceiverId
+                where ms.SenderId == userId ||
+                      mr.ReceiverId == userId
+                select u).AsNoTracking();
         }
     }
 }

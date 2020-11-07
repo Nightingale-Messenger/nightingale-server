@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -68,11 +67,17 @@ namespace Nightingale.App.Services
                     Property = "Email"
                 };
             }
+            
             var result = await _signInManager.PasswordSignInAsync(user,
                 userModel.Password, false, false);
             if (!result.Succeeded)
             {
-                throw new ValidationException("Invalid username or/and password ");
+                return new OperationDetails()
+                {
+                    Succeed = false,
+                    Message = "Invalid email and/or password",
+                    Property = "Email/password"
+                };
             }
             return new OperationDetails()
             {
@@ -109,14 +114,15 @@ namespace Nightingale.App.Services
 
         public async Task<OperationDetails> ChangePasswordAsync(User user, PasswordChangeModel model)
         {
-            var result = _userManager.ChangePasswordAsync(user,
+            var result = await _userManager.ChangePasswordAsync(user,
                 model.OldPassword, model.NewPassword);
-            if (!result.IsCompletedSuccessfully)
+            
+            if (!result.Succeeded)
             {
                 return new OperationDetails()
                 {
                     Succeed = false,
-                    Message = result.Result.Errors.ToString(),
+                    Message = "Wrong password",
                     Property = ""
                 };
             }

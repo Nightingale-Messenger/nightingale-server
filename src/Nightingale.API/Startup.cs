@@ -28,6 +28,7 @@ namespace Nightingale.API
             services.AddCustomCors();
             services.AddCustomDbContext(Configuration);
             services.AddCustomIdentity();
+            services.AddCustomCookies();
             services.ConfigureCustomIdentity();
             services.AddMessageRepository();
             services.AddUserService();
@@ -44,14 +45,16 @@ namespace Nightingale.API
                 app.UseDeveloperExceptionPage();
             }
             
-            app.UseCors(builder => builder.AllowAnyOrigin()
+            app.UseCors(builder => builder
+                .AllowAnyOrigin()
                 .AllowAnyHeader()
                 .AllowAnyMethod());
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
+            
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });

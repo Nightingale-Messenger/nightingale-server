@@ -6,16 +6,16 @@ namespace Nightingale.Core.Entities
 {
     public class Message : Entity
     {
-        public User Sender { get; }
+        public User Sender { get; set; }
         
-        public string SenderId { get; }
+        public string SenderId { get; set;}
         
-        public User Receiver { get; }
+        public User Receiver { get; set;}
         
-        public string ReceiverId { get; }
+        public string ReceiverId { get; set;}
         
-        public string Text { get; }
+        public string Text { get; set;}
         
-        public DateTime DateTime { get; }
+        public DateTime DateTime { get; set;}
     }
 }

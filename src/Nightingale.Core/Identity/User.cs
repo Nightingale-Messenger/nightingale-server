@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Nightingale.Core.Entities;
@@ -8,6 +9,8 @@ namespace Nightingale.Core.Identity
     {
         public string PublicUSerName { get; set; }
         
-        public IEnumerable<Message> Messages;
+        public IEnumerable<Message> SentMessages { get; set; }
+        
+        public IEnumerable<Message> ReceivedMessages { get; set; }
     }
 }

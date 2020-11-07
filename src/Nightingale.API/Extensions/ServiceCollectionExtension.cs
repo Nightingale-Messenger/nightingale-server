@@ -40,6 +40,17 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddEntityFrameworkStores<NightingaleContext>()
                 .AddDefaultTokenProviders();
         
+        public static IServiceCollection AddCustomCookies(this IServiceCollection services) =>
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromDays(28);
+
+                options.LoginPath = "/api/auth/login";
+                options.SlidingExpiration = true;
+            });
+        
         public static IServiceCollection ConfigureCustomIdentity(this IServiceCollection services) =>
             services
                 .Configure<IdentityOptions>(options =>

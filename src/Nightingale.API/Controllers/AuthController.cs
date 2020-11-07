@@ -21,8 +21,18 @@ namespace Nightingale.API.Controllers
         [Route("status")]
         public async Task<IActionResult> CheckStatus()
         {
-            if (User.Identity.IsAuthenticated) return Ok();
-            return Unauthorized();
+            if (User.Identity.IsAuthenticated) return Ok(new OperationDetails()
+            {
+                Succeed = true,
+                Message = "User logged in",
+                Property = ""
+            });
+            return Unauthorized(new OperationDetails()
+            {
+                Succeed = false,
+                Message = "User not logged in",
+                Property = ""
+            });
         }
 
         [HttpPost]
