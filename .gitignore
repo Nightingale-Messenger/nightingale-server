@@ -3,6 +3,7 @@
 **/.idea/shelf/*
 **/.idea/dictionaries
 **/.idea/httpRequests/
+**/.idea
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
@@ -40,3 +41,4 @@ Desktop.ini
 
 **/bin
 **/obj
+!/.idea/
