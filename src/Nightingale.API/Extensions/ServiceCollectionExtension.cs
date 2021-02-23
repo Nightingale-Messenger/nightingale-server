@@ -1,13 +1,16 @@
 using System;
 using System.Text;
-using System.Threading.Tasks;
 using Nightingale.Infrastructure.Data;
-using Nightingale.App.Models;
 using Nightingale.Core.Identity;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using Nightingale.API.Models;
+using Nightingale.API.Services;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Services;
 using Nightingale.Core.Repositories;
@@ -22,18 +25,43 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddCors(options =>
                 {
                     options.AddPolicy("CorsPolicy",
-                        builder => builder.AllowAnyOrigin()
+                        builder => builder
+                            .WithOrigins("https://localhost:5003")
                             .AllowAnyMethod()
-                            .AllowAnyHeader());
+                            .AllowAnyHeader()
+                            .AllowCredentials());
                 });
         
-        public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration Configuration) =>
+        public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration) =>
             services
                 .AddDbContext<NightingaleContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DatabaseContext"))
-                        .EnableSensitiveDataLogging()
+                    options.UseNpgsql(configuration.GetConnectionString("DatabaseContext"))
                 );
+
+        public static AuthenticationBuilder AddCustomJwt(this IServiceCollection services, IConfiguration configuration) =>
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = true;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = configuration["JwtConfig:Issuer"],
+                        ValidAudience = configuration["JwtConfig:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtConfig:Secret"]))
+                    };
+                });
         
+
         public static IdentityBuilder AddCustomIdentity(this IServiceCollection services) =>
             services
                 .AddIdentity<User, IdentityRole>()
@@ -45,12 +73,19 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 // Cookie settings
                 options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
                 options.ExpireTimeSpan = TimeSpan.FromDays(28);
 
                 options.LoginPath = "/api/auth/login";
                 options.SlidingExpiration = true;
             });
-        
+
+        public static IServiceCollection AddCustomJwtService(this IServiceCollection services,
+            IConfiguration configuration) =>
+            services
+                .AddSingleton(configuration.GetSection("JwtConfig").Get<JwtConfig>())
+                .AddTransient<IJwtService, JwtService>();
+
         public static IServiceCollection ConfigureCustomIdentity(this IServiceCollection services) =>
             services
                 .Configure<IdentityOptions>(options =>
@@ -78,8 +113,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services
                 .AddTransient<IMessageService, MessageService>();
         
+        public static IServiceCollection AddHubService(this IServiceCollection services) =>
+            services.AddTransient<IHubService, HubService>();
+        
         public static IServiceCollection AddUserService(this IServiceCollection services) =>
             services
                 .AddTransient<IUserService, UserService>();
+
+        public static IServiceCollection AddCustomRefreshTokenCleanerService(
+            this IServiceCollection services) =>
+            services.AddHostedService<RefreshTokenCleanService>();
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -153,6 +154,17 @@ namespace Nightingale.App.Services
                 _userManager.Users
                     .Where(u => EF.Functions.Like(u.PublicUserName, publicUserName))
                     .ToList());
+        }
+
+        public async Task<User> FindByEmailAsync(string email)
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+
+        public async Task<bool> CheckRefreshToken(string refreshToken)
+        {
+
+            throw new NotImplementedException();
         }
     }
 }

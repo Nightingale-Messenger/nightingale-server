@@ -1,7 +1,13 @@
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Nightingale.API.Services;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Models;
 
@@ -12,12 +18,22 @@ namespace Nightingale.API.Hubs
     {
         private readonly IHubService _hubService;
         private readonly IUserService _userService;
+        private readonly IJwtService _jwtService;
 
-        private MessageHub(IHubService hubService,
-            IUserService userService)
+        public MessageHub(IHubService hubService,
+            IUserService userService,
+            IJwtService jwtService)
         {
             _hubService = hubService;
             _userService = userService;
+            _jwtService = jwtService;
+        }
+
+        public override async Task OnConnectedAsync()
+        {
+            var user = await _userService.GetUserAsync(Context.User);
+            Console.WriteLine($"User {user.UserName} connected");
+            await base.OnConnectedAsync();
         }
 
         public async Task Send(NewMessageModel msg)

@@ -9,6 +9,8 @@ namespace Nightingale.Infrastructure.Data
     {
         public DbSet<Message> Messages { get; set; }
         
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        
         public NightingaleContext(DbContextOptions<NightingaleContext> options)
             : base(options)
         {
@@ -28,18 +30,9 @@ namespace Nightingale.Infrastructure.Data
                 .WithOne(m => m.Receiver)
                 .HasForeignKey(m => m.ReceiverId);
 
-            /*builder.Entity<Message>()
-                .HasKey(m => new {m.SenderId, m.ReceiverId});
-
-            builder.Entity<Message>()
-                .HasOne(m => m.Sender)
-                .WithMany(s => s.Messages)
-                .HasForeignKey(m => m.SenderId);
-
-            builder.Entity<Message>()
-                .HasOne(m => m.Receiver)
-                .WithMany(r => r.Messages)
-                .HasForeignKey(m => m.ReceiverId);*/
+            builder.Entity<User>()
+                .HasMany(u => u.RefreshTokens)
+                .WithOne(t => t.User);
         }
     }
 }

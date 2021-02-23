@@ -9,6 +9,8 @@ namespace Nightingale.Core.Identity
     {
         public string PublicUserName { get; set; }
         
+        public List<RefreshToken> RefreshTokens  { get; set; }
+        
         public IEnumerable<Message> SentMessages { get; set; }
         
         public IEnumerable<Message> ReceivedMessages { get; set; }

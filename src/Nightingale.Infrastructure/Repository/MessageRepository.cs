@@ -29,6 +29,9 @@ namespace Nightingale.Infrastructure.Repository
 
         public async Task<IEnumerable<User>> GetContacts(string userId)
         {
+            var users = _db.Messages.Where(m => m.Receiver.Id == userId || m.Sender.Id == userId).SelectMany(m => new[] { m.Receiver, m.Sender }).ToArray();
+
+            var relatedUsers = users.ToDictionary(x => x.Id);
             return (from u in _db.Users
                 join ms in _db.Messages on u.Id equals ms.SenderId
                 join mr in _db.Messages on u.Id equals mr.ReceiverId

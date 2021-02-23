@@ -1,27 +1,40 @@
+using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Nightingale.API.Models;
+using Nightingale.API.Services;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Models;
+using Nightingale.Infrastructure.Data;
 
 namespace Nightingale.API.Controllers
 {
     [ApiController]
+    [AllowAnonymous]
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
-        
-        public AuthController(IUserService userService)
+        private readonly IJwtService _jwtService;
+        private readonly NightingaleContext _appContext;
+        public AuthController(IUserService userService,
+            IJwtService jwtService,
+            NightingaleContext appContext)
         {
             _userService = userService;
+            _jwtService = jwtService;
+            _appContext = appContext;
         }
 
         [HttpGet]
         [Route("status")]
         public async Task<IActionResult> CheckStatus()
         {
-            if (User.Identity.IsAuthenticated) return Ok(new OperationDetails()
+            if (User.Identity != null &&
+                User.Identity.IsAuthenticated) return Ok(new OperationDetails()
             {
                 Succeed = true,
                 Message = "User logged in",
@@ -41,8 +54,16 @@ namespace Nightingale.API.Controllers
         {
             var result = await _userService.AuthenticateAsync(loginModel);
             if (!result.Succeed) return BadRequest(result);
-            
-            return Ok(result);
+            var user = await _userService.FindByEmailAsync(loginModel.Email);
+            var tokens = _jwtService.GenerateTokens(loginModel.Email, new []
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim("Email", loginModel.Email)
+            });
+            tokens.RefreshToken.User = await _userService.FindByEmailAsync(loginModel.Email);
+            await _appContext.RefreshTokens.AddAsync(tokens.RefreshToken);
+            await _appContext.SaveChangesAsync();
+            return Ok(new {AccessToken = tokens.AccessToken, RefreshToken = tokens.RefreshToken.Token});
         }
 
         [HttpPost]
@@ -51,11 +72,11 @@ namespace Nightingale.API.Controllers
         {
             var result = await _userService.CreateAsync(registerModel);
             if (!result.Succeed) return BadRequest(result);
-            await _userService.AuthenticateAsync(new LoginModel()
-            {
-                Email = registerModel.Email,
-                Password = registerModel.Password
-            });
+            // await _userService.AuthenticateAsync(new LoginModel()
+            // {
+            //     Email = registerModel.Email,
+            //     Password = registerModel.Password
+            // });
             
             return Ok(result);
         }
@@ -67,6 +88,89 @@ namespace Nightingale.API.Controllers
         {
             await _userService.Logout();
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshModel refreshModel)
+        {
+            // if (!Request.Headers.ContainsKey("Authorization"))
+            // {
+            //     return Unauthorized("Bearer token required");
+            // }
+            
+            var dbToken = _appContext.RefreshTokens
+                .SingleOrDefault(t => t.Token.Equals(refreshModel.RefreshToken));
+            if (dbToken == null)
+            {
+                return Unauthorized(new OperationDetails()
+                {
+                    Message = "Provided refresh token is invalid",
+                    Succeed = false,
+                    Property = "token"
+                });
+            }
+
+            if (dbToken.ExpirationDate < DateTime.Now)
+            {
+                _appContext.RefreshTokens.Remove(dbToken);
+                await _appContext.SaveChangesAsync();
+                return Unauthorized(new OperationDetails()
+                {
+                    Message = "Provided refresh token is expired",
+                    Succeed = false,
+                    Property = "token"
+                });
+            }
+            
+            var newTokens = _jwtService.GenerateTokens(dbToken.Email, new []
+            {
+                new Claim(ClaimTypes.NameIdentifier, dbToken.User.Id),
+                new Claim("Email", dbToken.Email)
+            });
+            
+            dbToken.Token = newTokens.RefreshToken.Token;
+            dbToken.ExpirationDate = newTokens.RefreshToken.ExpirationDate;
+            await _appContext.SaveChangesAsync();
+            return Ok(new {AccessToken = newTokens.AccessToken, RefreshToken = newTokens.RefreshToken.Token});
+        }
+
+        [HttpGet]
+        [Authorize]
+        [Route("logins")]
+        public async Task<IActionResult> GetLogins()
+        {
+            var user = await _userService.GetUserAsync(User);
+            return Ok(from token in user.RefreshTokens select token.Token);
+        }
+
+        [HttpDelete]
+        [Authorize]
+        [Route("revoke")]
+        public async Task<IActionResult> RevokeAccessToken([FromBody] RefreshModel refreshModel)
+        {
+            var user = await _userService.GetUserAsync(User);
+            var token = _appContext.RefreshTokens
+                .SingleOrDefault(t => t.Token == refreshModel.RefreshToken &&
+                                      t.Email == user.Email);
+            if (token == null)
+            {
+                return BadRequest(new OperationDetails()
+                {
+                    Message = "Specified token does not exist",
+                    Succeed = false,
+                    Property = "token"
+                });
+            }
+
+            var res = _appContext.RefreshTokens.Remove(token);
+
+            await _appContext.SaveChangesAsync();
+            return Ok(new OperationDetails()
+            {
+                Message = "Refresh Token successfully deleted",
+                Succeed = true
+            });
         }
     }
 }

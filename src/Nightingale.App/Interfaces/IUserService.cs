@@ -12,6 +12,8 @@ namespace Nightingale.App.Interfaces
 
         Task<User> GetUserAsync(ClaimsPrincipal user);
 
+        Task<User> FindByEmailAsync(string email);
+
         Task<OperationDetails> CreateAsync(RegisterModel userModel);
 
         Task<OperationDetails> AuthenticateAsync(LoginModel userModel);
