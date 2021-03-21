@@ -26,9 +26,15 @@ namespace Nightingale.App.Mapper
     {
         public NightingaleDtoMapper()
         {
-            CreateMap<Message, MessageModel>();
+            CreateMap<Message, MessageModel>()
+                .ForMember(dest => dest.Receiver,
+                    opt => opt.MapFrom(src => NightingaleMapper.Mapper.Map<UserModel>(src.Receiver)))
+                .ForMember(dest => dest.Sender,
+                    opt => opt.MapFrom(src => NightingaleMapper.Mapper.Map<UserModel>(src.Sender)));
 
-            CreateMap<User, UserModel>();
+            CreateMap<User, UserModel>()
+                .ForMember(dest=> dest.UserName,
+                opt => opt.MapFrom(src => src.UserName));
         }
     }
 }

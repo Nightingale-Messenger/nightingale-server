@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -143,28 +142,17 @@ namespace Nightingale.App.Services
             return await _userManager.GetUserAsync(user);
         }
 
-        public async Task<IEnumerable<UserModel>> FindByPublicUserName(string publicUserName)
-        {
-            return NightingaleMapper.Mapper.Map<IEnumerable<UserModel>>(null);
-        }
-
         public async Task<IEnumerable<UserModel>> FindByPublicUserNameAsync(string publicUserName)
         {
             return NightingaleMapper.Mapper.Map<IEnumerable<UserModel>>(
-                _userManager.Users
-                    .Where(u => EF.Functions.Like(u.PublicUserName, publicUserName))
-                    .ToList());
+                await _userManager.Users
+                    .Where(u => EF.Functions.Like(u.UserName, $"%{publicUserName}%"))
+                    .ToListAsync());
         }
 
         public async Task<User> FindByEmailAsync(string email)
         {
             return await _userManager.FindByEmailAsync(email);
-        }
-
-        public async Task<bool> CheckRefreshToken(string refreshToken)
-        {
-
-            throw new NotImplementedException();
         }
     }
 }

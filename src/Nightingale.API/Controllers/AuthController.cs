@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Nightingale.API.Models;
 using Nightingale.API.Services;
 using Nightingale.App.Interfaces;
@@ -57,6 +58,8 @@ namespace Nightingale.API.Controllers
             var user = await _userService.FindByEmailAsync(loginModel.Email);
             var tokens = _jwtService.GenerateTokens(loginModel.Email, new []
             {
+                new Claim("Id", user.Id),
+                new Claim("Username", user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim("Email", loginModel.Email)
             });
@@ -100,6 +103,7 @@ namespace Nightingale.API.Controllers
             // }
             
             var dbToken = _appContext.RefreshTokens
+                .Include(t => t.User)
                 .SingleOrDefault(t => t.Token.Equals(refreshModel.RefreshToken));
             if (dbToken == null)
             {
@@ -125,8 +129,10 @@ namespace Nightingale.API.Controllers
             
             var newTokens = _jwtService.GenerateTokens(dbToken.Email, new []
             {
+                new Claim("Id", dbToken.User.Id),
+                new Claim("Username", dbToken.User.UserName),
                 new Claim(ClaimTypes.NameIdentifier, dbToken.User.Id),
-                new Claim("Email", dbToken.Email)
+                new Claim("Email", dbToken.User.Email)
             });
             
             dbToken.Token = newTokens.RefreshToken.Token;

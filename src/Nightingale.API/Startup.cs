@@ -33,6 +33,7 @@ namespace Nightingale.API
             services.AddControllers();
             services.AddSignalR();
             services.AddHubService();
+            services.AddCustomRefreshTokenCleanerService();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,7 +58,7 @@ namespace Nightingale.API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapHub<MessageHub>("/messagehub");
+                endpoints.MapHub<MessageHub>("/api/messagehub");
             });
         }
     }

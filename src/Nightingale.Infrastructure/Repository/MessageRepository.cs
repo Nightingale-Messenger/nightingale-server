@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -18,19 +19,38 @@ namespace Nightingale.Infrastructure.Repository
 
         public async Task<IEnumerable<Message>> GetLastN(int n, string issuerId, string targetId)
         {
+            return _db.Messages
+                .Include(m => m.Sender)
+                .Include(m => m.Receiver)
+                .Where(m => m.Sender.Id == issuerId &&
+                            m.Receiver.Id == targetId ||
+                            m.Sender.Id == targetId &&
+                            m.Receiver.Id == issuerId)
+                .OrderBy(message => message.DateTime)
+                .Select(m => m)
+                .AsNoTracking()
+                .Take(n);
+            /*
             return (from m in _db.Messages
                 where m.Sender.Id == issuerId &&
                       m.Receiver.Id == targetId ||
                       m.Sender.Id == targetId &&
                       m.Receiver.Id == issuerId
-                orderby m.DateTime descending
+                orderby m.DateTime ascending 
                 select m).AsNoTracking().Take(n);
+                */
         }
 
         public async Task<IEnumerable<User>> GetContacts(string userId)
         {
-            var users = _db.Messages.Where(m => m.Receiver.Id == userId || m.Sender.Id == userId).SelectMany(m => new[] { m.Receiver, m.Sender }).ToArray();
+            var users = _db.Messages
+                .Include(m => m.Sender)
+                .Include(m => m.Receiver)
+                .Where(m => m.Receiver.Id == userId || m.Sender.Id == userId)
+                .Select(m => m.SenderId == userId ? m.Receiver : m.Sender).ToArray();
+                //.SelectMany(m => new User[] { m.Receiver, m.Sender }).ToArray();
 
+                return users.Distinct();
             var relatedUsers = users.ToDictionary(x => x.Id);
             return (from u in _db.Users
                 join ms in _db.Messages on u.Id equals ms.SenderId

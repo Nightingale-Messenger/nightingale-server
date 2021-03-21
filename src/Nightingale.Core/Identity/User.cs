@@ -14,5 +14,10 @@ namespace Nightingale.Core.Identity
         public IEnumerable<Message> SentMessages { get; set; }
         
         public IEnumerable<Message> ReceivedMessages { get; set; }
+
+        public override bool Equals(object? obj)
+        {
+            return this.Id == ((User) (obj))?.Id;
+        }
     }
 }

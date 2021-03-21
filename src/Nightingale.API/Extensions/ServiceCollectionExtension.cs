@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading.Tasks;
 using Nightingale.Infrastructure.Data;
 using Nightingale.Core.Identity;
 using Microsoft.AspNetCore.Authentication;
@@ -25,17 +26,16 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddCors(options =>
                 {
                     options.AddPolicy("CorsPolicy",
-                        builder => builder
-                            .WithOrigins("https://localhost:5003")
-                            .AllowAnyMethod()
-                            .AllowAnyHeader()
-                            .AllowCredentials());
+                                            builder => builder.WithOrigins("http://localhost:4200")
+                                                .AllowAnyMethod()
+                                                .AllowAnyHeader()
+                                                .AllowCredentials());
                 });
         
         public static IServiceCollection AddCustomDbContext(this IServiceCollection services, IConfiguration configuration) =>
             services
                 .AddDbContext<NightingaleContext>(options =>
-                    options.UseNpgsql(configuration.GetConnectionString("DatabaseContext"))
+                    options.UseSqlServer(configuration.GetConnectionString("DatabaseContext"))
                 );
 
         public static AuthenticationBuilder AddCustomJwt(this IServiceCollection services, IConfiguration configuration) =>
@@ -58,6 +58,24 @@ namespace Microsoft.Extensions.DependencyInjection
                         ValidIssuer = configuration["JwtConfig:Issuer"],
                         ValidAudience = configuration["JwtConfig:Audience"],
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtConfig:Secret"]))
+                    };
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+
+                            // If the request is for our hub...
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) &&
+                                (path.StartsWithSegments("/api/messagehub")))
+                                Console.WriteLine("hub");
+                            {
+                                // Read the token out of the query string
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
         
@@ -83,7 +101,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddCustomJwtService(this IServiceCollection services,
             IConfiguration configuration) =>
             services
-                .AddSingleton(configuration.GetSection("JwtConfig").Get<JwtConfig>())
+                .AddSingleton<JwtConfig>((ServiceProvider) => configuration.GetSection("JwtConfig").Get<JwtConfig>())
                 .AddTransient<IJwtService, JwtService>();
 
         public static IServiceCollection ConfigureCustomIdentity(this IServiceCollection services) =>

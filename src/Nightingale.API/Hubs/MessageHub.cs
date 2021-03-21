@@ -1,13 +1,8 @@
 using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Nightingale.API.Services;
 using Nightingale.App.Interfaces;
 using Nightingale.App.Models;
 
@@ -18,15 +13,12 @@ namespace Nightingale.API.Hubs
     {
         private readonly IHubService _hubService;
         private readonly IUserService _userService;
-        private readonly IJwtService _jwtService;
 
         public MessageHub(IHubService hubService,
-            IUserService userService,
-            IJwtService jwtService)
+            IUserService userService)
         {
             _hubService = hubService;
             _userService = userService;
-            _jwtService = jwtService;
         }
 
         public override async Task OnConnectedAsync()
@@ -40,20 +32,33 @@ namespace Nightingale.API.Hubs
         {
             var user = await _userService.GetUserAsync(Context.User);
 
-            if (msg.SenderId != user.Id)
-            {
-                await Clients.Caller.SendAsync("ReportError", "Sender id not equal to current user id");
+            msg.SenderId = Context.UserIdentifier;
+            if (msg.SenderId == null)
                 return;
-            }
+            Console.WriteLine(
+                $"new message\nsender: {msg.SenderId}\nreceiver: {msg.ReceiverId}\nTime: {DateTime.Now.ToString()}");
 
             var message = await _hubService.SendAsync(msg);
 
-            await Clients.User(msg.ReceiverId).SendAsync("ReceiveMessage", message);
+            await Clients.User(msg.ReceiverId).SendAsync("ReceiveMessage",
+                new
+                {
+                    message.Sender, message.Receiver,
+                    message.Id, message.Text, message.DateTime
+                });
+
+            await Clients.User(msg.SenderId).SendAsync("ReceiveMessage",
+                new
+                {
+                    message.Sender, message.Receiver,
+                    message.Id, message.Text, message.DateTime
+                });
         }
 
         public async Task GetLastMessages(string receiverId)
         {
             var user = await _userService.GetUserAsync(Context.User);
+            var messages = await _hubService.GetLastMessagesAsync(user.Id, receiverId);
             await Clients.Caller.SendAsync("GetMessages",
                 await _hubService.GetLastMessagesAsync(user.Id, receiverId));
         }
@@ -65,7 +70,7 @@ namespace Nightingale.API.Hubs
                 await _hubService.GetContacts(user));
         }
 
-        public async Task FindByPublicUserName(string publicUserName)
+        public async Task FindByUserName(string publicUserName)
         {
             await Clients.Caller.SendAsync("GetFindResults",
                 await _hubService.FindByPublicUserName(publicUserName));
@@ -76,7 +81,7 @@ namespace Nightingale.API.Hubs
             if (!await _hubService.CheckMessagePermission(id,
                 Context.User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
-                await Clients.Caller.SendAsync("ReportError", 
+                await Clients.Caller.SendAsync("ReportError",
                     $"User have no access to message with id {id}");
                 return;
             }

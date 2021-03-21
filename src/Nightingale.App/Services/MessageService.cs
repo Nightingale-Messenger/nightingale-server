@@ -39,19 +39,21 @@ namespace Nightingale.App.Services
         public async Task<IEnumerable<MessageModel>> GetLastN(int n, string issuerId, string targetId)
         {
             return NightingaleMapper.Mapper.Map<IEnumerable<MessageModel>>(
-                _messageRepository.GetLastN(n, issuerId, targetId));
+                await _messageRepository.GetLastN(n, issuerId, targetId));
         }
         
-        public Task<IEnumerable<UserModel>> GetContacts(string userId)
+        public async Task<IEnumerable<UserModel>> GetContacts(string userId)
         {
+            //var users = await _messageRepository.GetContacts(userId);
+            
             return NightingaleMapper
-                .Mapper.Map<Task<IEnumerable<UserModel>>>(_messageRepository.GetContacts(userId));
+                .Mapper.Map<IEnumerable<UserModel>>(await _messageRepository.GetContacts(userId));
         }
 
         public async Task<IEnumerable<MessageModel>> GetMessagesBeforeId(int id)
         {
             return NightingaleMapper.Mapper.Map<IEnumerable<MessageModel>>(
-                _messageRepository.GetMessagesBeforeId(20, id));
+                await _messageRepository.GetMessagesBeforeId(20, id));
         }
     }
 }

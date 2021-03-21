@@ -7,16 +7,20 @@ namespace Nightingale.App.Models
     {
         public int Id { get; set; }
         
-        public User Sender { get; set; }
+        //public User Sender { get; set; }
         
-        public string SenderId { get; }
+        //public string SenderId { get; set; }
+
+        public UserModel Sender { get; set; }
         
-        public User Receiver { get; }
+        //public User Receiver { get; }
         
-        public string ReceiverId { get; }
+        //public string ReceiverId { get; set; }
         
-        public string Text { get; }
+        public UserModel Receiver { get; set; }
         
-        public DateTime DateTime { get; }
+        public string Text { get; set; }
+        
+        public DateTime DateTime { get; set; }
     }
 }

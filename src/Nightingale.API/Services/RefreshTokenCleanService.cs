@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Nightingale.Infrastructure.Data;
 
@@ -10,11 +11,11 @@ namespace Nightingale.API.Services
     public class RefreshTokenCleanService : IHostedService
     {
         private System.Threading.Timer _timer;
-        private readonly NightingaleContext _appContext;
+        private readonly IServiceScopeFactory scopeFactory;
 
-        public RefreshTokenCleanService(NightingaleContext appContext)
+        public RefreshTokenCleanService(IServiceScopeFactory scopeFactory)
         {
-            _appContext = appContext;
+            this.scopeFactory = scopeFactory;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -25,12 +26,15 @@ namespace Nightingale.API.Services
 
         private async void Action(object state)
         {
-            var tokens = _appContext.RefreshTokens
-                .Where(token => token.ExpirationDate <= DateTime.Now);
-            _appContext.RefreshTokens.RemoveRange(tokens);
-            await _appContext.SaveChangesAsync();
+            using (var scope = scopeFactory.CreateScope())
+            {
+                var appContext = scope.ServiceProvider.GetRequiredService<NightingaleContext>();
+                var tokens = appContext.RefreshTokens
+                    .Where(token => token.ExpirationDate <= DateTime.Now);
+                appContext.RefreshTokens.RemoveRange(tokens);
+                await appContext.SaveChangesAsync();
+            }
         }
-        
 
         public Task StopAsync(CancellationToken stoppingToken)
         {

@@ -12,4 +12,8 @@
       <ProjectReference Include="..\Nightingale.Infrastructure\Nightingale.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="obj\Debug\net5.0" />
+    </ItemGroup>
+
 </Project>

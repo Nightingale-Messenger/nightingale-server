@@ -33,6 +33,10 @@ namespace Nightingale.Infrastructure.Data
             builder.Entity<User>()
                 .HasMany(u => u.RefreshTokens)
                 .WithOne(t => t.User);
+
+            builder.Entity<RefreshToken>()
+                .HasOne(rt => rt.User)
+                .WithMany(u => u.RefreshTokens);
         }
     }
 }

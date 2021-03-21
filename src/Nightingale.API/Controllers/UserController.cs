@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,5 +34,21 @@ namespace Nightingale.API.Controllers
 
             return BadRequest(result);
         }
+
+        [HttpGet]
+        [Route("info/{id}")]
+        public async Task<IActionResult> GetUserInfo(string id)
+        {
+            var user = await _userService.GetByIdAsync(id);
+            if (user == null)
+                return BadRequest(new OperationDetails()
+                {
+                    Message = "User with specified id does not exist",
+                    Property = "id",
+                    Succeed = false
+                });
+            return Ok(user);
+        }
+
     }
 }
