@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -59,8 +60,9 @@ namespace Nightingale.API.Hubs
         {
             var user = await _userService.GetUserAsync(Context.User);
             var messages = await _hubService.GetLastMessagesAsync(user.Id, receiverId);
+            // Console.WriteLine(String.Join(',', messages.Select(m => m.Id)));
             await Clients.Caller.SendAsync("GetMessages",
-                await _hubService.GetLastMessagesAsync(user.Id, receiverId));
+                messages);
         }
 
         public async Task GetContacts()
@@ -78,6 +80,7 @@ namespace Nightingale.API.Hubs
 
         public async Task GetMessagesBeforeId(int id)
         {
+            Console.WriteLine(id);
             if (!await _hubService.CheckMessagePermission(id,
                 Context.User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
@@ -86,8 +89,10 @@ namespace Nightingale.API.Hubs
                 return;
             }
 
+            var res = await _hubService.GetMessagesBeforeId(id);
+            // Console.WriteLine(String.Join(',', res.Select(res => res.Id).ToArray()));
             await Clients.Caller.SendAsync("GetMessages",
-                await _hubService.GetMessagesBeforeId(id));
+                res);
         }
     }
 }

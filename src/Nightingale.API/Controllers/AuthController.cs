@@ -150,7 +150,7 @@ namespace Nightingale.API.Controllers
             return Ok(from token in user.RefreshTokens select token.Token);
         }
 
-        [HttpDelete]
+        [HttpPost]
         [Authorize]
         [Route("revoke")]
         public async Task<IActionResult> RevokeAccessToken([FromBody] RefreshModel refreshModel)
