@@ -48,12 +48,13 @@ namespace Nightingale.API.Hubs
                     message.Id, message.Text, message.DateTime
                 });
 
-            await Clients.User(msg.SenderId).SendAsync("ReceiveMessage",
-                new
-                {
-                    message.Sender, message.Receiver,
-                    message.Id, message.Text, message.DateTime
-                });
+            if (msg.SenderId != msg.ReceiverId)
+                await Clients.User(msg.SenderId).SendAsync("ReceiveMessage",
+                    new
+                    {
+                        message.Sender, message.Receiver,
+                        message.Id, message.Text, message.DateTime
+                    });
         }
 
         public async Task GetLastMessages(string receiverId)
@@ -80,7 +81,6 @@ namespace Nightingale.API.Hubs
 
         public async Task GetMessagesBeforeId(int id)
         {
-            Console.WriteLine(id);
             if (!await _hubService.CheckMessagePermission(id,
                 Context.User.FindFirstValue(ClaimTypes.NameIdentifier)))
             {
